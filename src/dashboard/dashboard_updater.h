@@ -21,10 +21,10 @@ private:
     std::vector<Stack> stacks_;
 
     // Card builders
-    json dockerHostSection() const;
-    json sectionStandalone(const Stack& stack) const;
-    json sectionExpander(const Stack& stack) const;
-    json buildBadges() const;
+    [[nodiscard]] json dockerHostSection() const;
+    [[nodiscard]] json sectionStandalone(const Stack& stack) const;
+    [[nodiscard]] json sectionExpander(const Stack& stack) const;
+    [[nodiscard]] json buildBadges() const;
 
     // Wraps an expression in {{ }} for HA Jinja2 templates
     static std::string ht(const std::string& expr);

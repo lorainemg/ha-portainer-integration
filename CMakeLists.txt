@@ -35,7 +35,9 @@ enable_testing()
 
 add_executable(ha-portainer-tests
     tests/ha_client_test.cpp
+    tests/dashboard_updater_test.cpp
     src/ha/ha_client.cpp
+    src/dashboard/dashboard_updater.cpp
 )
 
 target_link_libraries(ha-portainer-tests PRIVATE
