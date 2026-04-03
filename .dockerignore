@@ -1,0 +1,7 @@
+build/
+.git/
+.idea/
+.dockerignore
+CLAUDE.md
+LICENSE
+README.md
