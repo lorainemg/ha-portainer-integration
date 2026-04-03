@@ -13,7 +13,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Development Approach
 
 - **Incremental steps:** Implement features in small, well-explained increments. Explain what will be done before doing it, and summarize what was done after.
-- **Teaching focus:** Use this project to introduce C++ concepts (memory management, RAII, templates, STL, smart pointers, etc.), drawing analogies to Python/C#/TS where helpful.
+- **Teaching focus:** Use this project to introduce C++ concepts (memory management, RAII, templates, STL, smart pointers, etc.), drawing analogies to Python/C#/TS where helpful. Never use a C++ concept without fully explaining it first — do not assume the user already knows syntax from prior passing mentions.
 - **Extensibility:** The dashboard generation should be easy to extend as new containers/stacks are added to Portainer.
 
 ## Current State
