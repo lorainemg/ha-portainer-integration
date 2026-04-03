@@ -28,7 +28,7 @@ std::vector<Stack> buildStacks() {
     };
 }
 
-void run(const std::string& url, const std::string& token) {
+void run(const std::string& url, const std::string& token, const std::string& portainer_url) {
     auto ws = std::make_unique<BoostWebSocketConnection>();
     HomeAssistantClient client(url, token, std::move(ws));
 
@@ -39,7 +39,7 @@ void run(const std::string& url, const std::string& token) {
     auto config = client.getDashboardConfig("dashboard-test");
 
     std::cout << "Updating Portainer view..." << std::endl;
-    DashboardUpdater updater("https://portainer.sussman.win", buildStacks());
+    DashboardUpdater updater(portainer_url, buildStacks());
     auto updated = updater.updateDashboard(config);
 
     std::cout << "Saving dashboard..." << std::endl;
@@ -52,14 +52,15 @@ void run(const std::string& url, const std::string& token) {
 int main() {
     const char* url = std::getenv("HA_URL");
     const char* token = std::getenv("HA_TOKEN");
+    const char* portainer_url = std::getenv("PORTAINER_URL");
 
-    if (!url || !token) {
-        std::cerr << "Error: HA_URL and HA_TOKEN environment variables must be set" << std::endl;
+    if (!url || !token || !portainer_url) {
+        std::cerr << "Error: HA_URL, HA_TOKEN, and PORTAINER_URL environment variables must be set" << std::endl;
         return 1;
     }
 
     try {
-        run(url, token);
+        run(url, token, portainer_url);
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
         return 1;

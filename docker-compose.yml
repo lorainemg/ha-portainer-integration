@@ -3,7 +3,5 @@ services:
     build: .
     volumes:
       - .:/app
-    environment:
-      - HA_URL=wss://homeassistant.sussman.win/api/websocket
     env_file:
       - .env
