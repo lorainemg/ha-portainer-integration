@@ -44,7 +44,7 @@ void HomeAssistantClient::connect() {
     }
 }
 
-void HomeAssistantClient::disconnect() {
+void HomeAssistantClient::disconnect() const {
     if (ws_) {
         ws_->close();
     }

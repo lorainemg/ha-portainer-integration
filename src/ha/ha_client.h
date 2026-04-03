@@ -18,7 +18,7 @@ public:
                         std::unique_ptr<IWebSocketConnection> connection);
 
     void connect();
-    void disconnect();
+    void disconnect() const;
 
     json listDashboards();
     json getDashboardConfig(const std::string& url_path);

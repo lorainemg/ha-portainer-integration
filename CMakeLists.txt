@@ -20,6 +20,7 @@ add_executable(ha-portainer
     src/main.cpp
     src/ha/ha_client.cpp
     src/ws/boost_ws_connection.cpp
+    src/dashboard/dashboard_updater.cpp
 )
 
 target_link_libraries(ha-portainer PRIVATE
