@@ -3,7 +3,7 @@
 #include <string>
 #include <memory>
 #include <nlohmann/json.hpp>
-#include "i_ws_connection.h"
+#include "../ws/i_ws_connection.h"
 
 using json = nlohmann::json;
 

@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
-#include "../src/ha_client.h"
+#include "../src/ha/ha_client.h"
 
 // Mock: a fake IWebSocketConnection where we control what each method does.
 // MOCK_METHOD generates the fake implementation automatically.

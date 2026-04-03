@@ -18,8 +18,8 @@ FetchContent_MakeAvailable(googletest)
 
 add_executable(ha-portainer
     src/main.cpp
-    src/ha_client.cpp
-    src/boost_ws_connection.cpp
+    src/ha/ha_client.cpp
+    src/ws/boost_ws_connection.cpp
 )
 
 target_link_libraries(ha-portainer PRIVATE
@@ -34,7 +34,7 @@ enable_testing()
 
 add_executable(ha-portainer-tests
     tests/ha_client_test.cpp
-    src/ha_client.cpp
+    src/ha/ha_client.cpp
 )
 
 target_link_libraries(ha-portainer-tests PRIVATE

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "i_ws_connection.h"
+#include "../ws/i_ws_connection.h"
 
 #include <memory>
 #include <boost/asio.hpp>
