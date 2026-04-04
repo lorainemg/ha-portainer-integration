@@ -1,0 +1,67 @@
+stacks:
+  - slug: netdata
+    name: Netdata
+    icon: mdi:chart-line
+    portainer_id: 10
+
+  - slug: portainer
+    name: Portainer
+    icon: mdi:anchor
+    portainer_id: 0
+
+  - slug: caddy
+    name: Caddy
+    icon: mdi:image-multiple
+    portainer_id: 9
+    containers:
+      - slug: caddy
+        name: Caddy
+        icon: mdi:shield-check
+      - slug: cloudflared
+        name: Cloudflared
+        icon: mdi:cloud-arrow-up
+
+  - slug: home_assistant
+    name: Home Assistant
+    icon: mdi:image-multiple
+    portainer_id: 13
+    containers:
+      - slug: homeassistant
+        name: Home Assistant
+        icon: mdi:home-assistant
+      - slug: mosquitto
+        name: Mosquitto
+        icon: mdi:message-arrow-up-down
+
+  - slug: immich
+    name: Immich
+    icon: mdi:image-multiple
+    portainer_id: 1
+    containers:
+      - slug: immich_server
+        name: Server
+        icon: mdi:server
+      - slug: immich_machine_learning
+        name: Machine Learning
+        icon: mdi:brain
+      - slug: immich_postgres
+        name: Postgres
+        icon: mdi:database
+      - slug: immich_redis
+        name: Redis
+        icon: mdi:database-arrow-up
+
+  - slug: trakt_tg_bot
+    name: Trakt TG Bot
+    icon: mdi:image-multiple
+    portainer_id: 20
+    containers:
+      - slug: trakt_tg_bot_bot_1
+        name: TG Bot
+        icon: mdi:robot
+      - slug: trakt_tg_bot_env_dashboard_1
+        name: Aspire
+        icon: mdi:brain
+      - slug: trakt_tg_bot_postgres_1
+        name: Aspire
+        icon: mdi:database

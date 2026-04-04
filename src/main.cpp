@@ -5,34 +5,7 @@
 #include "ha/ha_client.h"
 #include "ws/boost_ws_connection.h"
 #include "dashboard/dashboard_updater.h"
-#include "dashboard/stack.h"
-
-std::vector<Stack> buildStacks() {
-    return {
-        {"netdata",   "Netdata",   "mdi:chart-line",    10, {}},
-        {"portainer", "Portainer", "mdi:anchor",        0,  {}},
-        {"caddy",     "Caddy",     "mdi:image-multiple", 9, {
-            {"caddy",       "Caddy",       "mdi:shield-check"},
-            {"cloudflared", "Cloudflared", "mdi:cloud-arrow-up"},
-        }},
-        {"home_assistant", "Home Assistant", "mdi:image-multiple", 13, {
-            {"homeassistant", "Home Assistant", "mdi:home-assistant"},
-            {"mosquitto",     "Mosquitto",      "mdi:message-arrow-up-down"},
-        }},
-        {"immich", "Immich", "mdi:image-multiple", 1, {
-            {"immich_server",           "Server",           "mdi:server"},
-            {"immich_machine_learning", "Machine Learning", "mdi:brain"},
-            {"immich_postgres",         "Postgres",         "mdi:database"},
-            {"immich_redis",            "Redis",            "mdi:database-arrow-up"},
-        }},
-
-{"trakt_tg_bot", "Trakt TG Bot", "mdi:image-multiple", 20, {
-                {"trakt_tg_bot_bot_1", "TG Bot", "mdi:robot"},
-                {"trakt_tg_bot_env_dashboard_1",     "Aspire",      "mdi:brain"},
-                {"trakt_tg_bot_postgres_1",     "Aspire",      "mdi:database"},
-            }},
-    };
-}
+#include "config/config_parser.h"
 
 void run(const std::string& url, const std::string& token, const std::string& portainer_url) {
     auto ws = std::make_unique<BoostWebSocketConnection>();
@@ -45,7 +18,8 @@ void run(const std::string& url, const std::string& token, const std::string& po
     auto config = client.getDashboardConfig("dashboard-test");
 
     std::cout << "Updating Portainer view..." << std::endl;
-    DashboardUpdater updater(portainer_url, buildStacks());
+    auto stacks = loadStacks("/app/stacks.yaml");
+    DashboardUpdater updater(portainer_url, stacks);
     auto updated = updater.updateDashboard(config);
 
     std::cout << "Saving dashboard..." << std::endl;
