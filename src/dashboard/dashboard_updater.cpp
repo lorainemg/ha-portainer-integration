@@ -27,7 +27,7 @@ json DashboardUpdater::generateView() const {
         {"type", "sections"},
         {"max_columns", 4},
         {"title", "Portainer"},
-        {"path", "portainer"},
+        {"path", "test-portainer"},
         {"icon", "mdi:docker"},
         {"subview", false},
         {"badges", buildBadges()},
@@ -46,7 +46,7 @@ json DashboardUpdater::updateDashboard(const json& existing_config) const {
     // Search for an existing Portainer view by path
     // std::find_if walks the array and returns an iterator to the first match
     auto it = std::find_if(views.begin(), views.end(), [](const json& view) {
-        return view.contains("path") && view["path"] == "portainer";
+        return view.contains("path") && view["path"] == "test-portainer";
     });
 
     if (it != views.end()) {
@@ -72,6 +72,7 @@ json DashboardUpdater::dockerHostSection() const {
                 {"type", "custom:stack-in-card"},
                 {"title", "Docker Host"},
                 {"mode", "vertical"},
+                {"grid_options", {{"columns", "full"}}},
                 {"cards", {
                     // Host header card
                     {
@@ -133,6 +134,7 @@ json DashboardUpdater::sectionStandalone(const Stack& stack) const {
             {
                 {"type", "custom:stack-in-card"},
                 {"title", stack.name},
+                {"grid_options", {{"columns", "full"}}},
                 {"mode", "vertical"},
                 {"cards", {
                     mushroomHeader(stack.slug, stack.name, stack.icon,

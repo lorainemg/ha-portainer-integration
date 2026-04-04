@@ -1,4 +1,5 @@
 #include "boost_ws_connection.h"
+#include <openssl/ssl.h>
 
 void BoostWebSocketConnection::connect(const std::string& host,
                                        const std::string& port,
@@ -12,6 +13,10 @@ void BoostWebSocketConnection::connect(const std::string& host,
 
     // TCP connect: open a raw socket to the resolved IP
     net::connect(ws_->next_layer().next_layer(), results);
+
+    // Set SNI (Server Name Indication) so the server knows which hostname
+    // we're requesting — required by most TLS servers behind reverse proxies
+    SSL_set_tlsext_host_name(ws_->next_layer().native_handle(), host.c_str());
 
     // SSL handshake: negotiate encryption over the TCP connection
     ws_->next_layer().handshake(ssl::stream_base::client);

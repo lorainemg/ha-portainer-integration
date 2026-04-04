@@ -25,6 +25,12 @@ std::vector<Stack> buildStacks() {
             {"immich_postgres",         "Postgres",         "mdi:database"},
             {"immich_redis",            "Redis",            "mdi:database-arrow-up"},
         }},
+
+{"trakt_tg_bot", "Trakt TG Bot", "mdi:image-multiple", 20, {
+                {"trakt_tg_bot_bot_1", "TG Bot", "mdi:robot"},
+                {"trakt_tg_bot_env_dashboard_1",     "Aspire",      "mdi:brain"},
+                {"trakt_tg_bot_postgres_1",     "Aspire",      "mdi:database"},
+            }},
     };
 }
 
