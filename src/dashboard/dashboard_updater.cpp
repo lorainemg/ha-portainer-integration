@@ -30,6 +30,7 @@ json DashboardUpdater::generateView() const {
         {"path", "test-portainer"},
         {"icon", "mdi:docker"},
         {"subview", false},
+        {"header", buildHeader()},
         {"badges", buildBadges()},
         {"sections", sections},
         {"cards", json::array()}
@@ -59,6 +60,48 @@ json DashboardUpdater::updateDashboard(const json& existing_config) const {
     }
 
     return config;
+}
+
+json DashboardUpdater::buildHeader() const {
+    // R"(...)" is a raw string literal — no escaping needed for quotes,
+    // braces, or newlines. The Jinja2 {{ }} expressions pass through as-is.
+    std::string content = R"(
+<style>
+  .host-icon-bg { background-color: {{ 'rgb(219 234 254)' if is_state('binary_sensor.local_status', 'on') else 'rgb(254 226 226)' }}; }
+  .host-icon-color { color: {{ 'rgb(37 99 235)' if is_state('binary_sensor.local_status', 'on') else 'rgb(220 38 38)' }}; }
+  .host-status-bg { background-color: {{ 'rgb(220 252 231)' if is_state('binary_sensor.local_status', 'on') else 'rgb(254 226 226)' }}; }
+  .host-status-color { color: {{ 'rgb(21 128 61)' if is_state('binary_sensor.local_status', 'on') else 'rgb(185 28 28)' }}; }
+</style>
+<div class="flex items-center gap-4 p-4">
+  <div class="flex items-center justify-center w-16 h-16 rounded-full host-icon-bg">
+    <svg class="w-8 h-8 host-icon-color" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M20 3H4a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1zm-1 16H5V5h14v14zM7 7h2v2H7zm0 4h2v2H7zm0 4h2v2H7zm4-8h2v2h-2zm0 4h2v2h-2zm0 4h2v2h-2zm4-8h2v2h-2zm0 4h2v2h-2zm0 4h2v2h-2z"/>
+    </svg>
+  </div>
+  <div class="flex flex-col">
+    <span class="text-3xl font-semibold">Docker Host</span>
+    <span class="text-base text-gray-500">
+      {{ states('sensor.local_operating_system') | default('—') }}
+      {{ states('sensor.local_operating_system_version') | default('') }}
+      · Kernel {{ states('sensor.local_kernel_version') | default('—') }}
+      · {{ states('sensor.local_architecture') | default('—') }}
+    </span>
+  </div>
+  <div class="ml-auto flex gap-2">
+    <span class="px-3 py-1 rounded-full text-sm font-medium host-status-bg host-status-color">
+      {{ 'Online' if is_state('binary_sensor.local_status', 'on') else 'Offline' }}
+    </span>
+  </div>
+</div>
+)";
+
+    return {
+        {"card", {
+            {"type", "custom:tailwindcss-template-card"},
+            {"content", content},
+            {"always_update", true}
+        }}
+    };
 }
 
 json DashboardUpdater::dockerHostSection() const {

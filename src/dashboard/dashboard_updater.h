@@ -21,6 +21,7 @@ private:
     std::vector<Stack> stacks_;
 
     // Card builders
+    [[nodiscard]] json buildHeader() const;
     [[nodiscard]] json dockerHostSection() const;
     [[nodiscard]] json sectionStandalone(const Stack& stack) const;
     [[nodiscard]] json sectionExpander(const Stack& stack) const;

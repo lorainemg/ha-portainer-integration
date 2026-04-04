@@ -19,7 +19,7 @@ TEST_F(DashboardUpdaterTest, GeneratesViewWithCorrectStructure) {
     auto view = updater.generateView();
 
     EXPECT_EQ(view["type"], "sections");
-    EXPECT_EQ(view["path"], "portainer");
+    EXPECT_EQ(view["path"], "test-portainer");
     EXPECT_EQ(view["title"], "Portainer");
     EXPECT_EQ(view["icon"], "mdi:docker");
     EXPECT_EQ(view["max_columns"], 4);
@@ -70,7 +70,7 @@ TEST_F(DashboardUpdaterTest, UpdateDashboardReplacesExistingView) {
     json existing = {
         {"views", {
             {{"path", "home"}, {"title", "Home"}},
-            {{"path", "portainer"}, {"title", "Old Portainer"}}
+            {{"path", "test-portainer"}, {"title", "Old Portainer"}}
         }}
     };
 
@@ -80,7 +80,7 @@ TEST_F(DashboardUpdaterTest, UpdateDashboardReplacesExistingView) {
     ASSERT_EQ(result["views"].size(), 2);
     EXPECT_EQ(result["views"][0]["title"], "Home");
     EXPECT_EQ(result["views"][1]["title"], "Portainer");
-    EXPECT_EQ(result["views"][1]["path"], "portainer");
+    EXPECT_EQ(result["views"][1]["path"], "test-portainer");
 }
 
 TEST_F(DashboardUpdaterTest, UpdateDashboardAppendsWhenNoPortainerView) {
