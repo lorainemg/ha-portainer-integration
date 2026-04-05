@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include "../src/ha/ha_client.h"
+#include "../src/errors.h"
+#include <boost/system/system_error.hpp>
 
 // Mock: a fake IWebSocketConnection where we control what each method does.
 // MOCK_METHOD generates the fake implementation automatically.
@@ -79,4 +81,77 @@ TEST_F(HomeAssistantClientTest, ConnectThrowsOnAuthFailure) {
 
     // EXPECT_THROW checks that the expression throws the given exception type
     EXPECT_THROW(client.connect(), std::runtime_error);
+}
+
+TEST_F(HomeAssistantClientTest, ThrowsConfigErrorOnMalformedUrl) {
+    EXPECT_THROW(
+        HomeAssistantClient("not-a-url", "token",
+                            std::make_unique<MockWebSocketConnection>()),
+        ConfigError
+    );
+}
+
+TEST_F(HomeAssistantClientTest, ThrowsConfigErrorOnUrlWithoutPath) {
+    EXPECT_THROW(
+        HomeAssistantClient("wss://ha.local", "token",
+                            std::make_unique<MockWebSocketConnection>()),
+        ConfigError
+    );
+}
+
+TEST_F(HomeAssistantClientTest, ThrowsConnectionErrorWhenConnectFails) {
+    auto [client, mock] = makeClient("wss://ha.local/api/websocket", "token");
+
+    EXPECT_CALL(*mock, connect(testing::_, testing::_, testing::_))
+        .WillOnce(testing::Throw(ConnectionError("Could not connect to ha.local:443: Connection refused")));
+
+    EXPECT_THROW(client.connect(), ConnectionError);
+}
+
+TEST_F(HomeAssistantClientTest, ThrowsAuthErrorOnInvalidJson) {
+    auto [client, mock] = makeClient("wss://ha.local/api/websocket", "token");
+
+    EXPECT_CALL(*mock, connect(testing::_, testing::_, testing::_));
+    EXPECT_CALL(*mock, read())
+        .WillOnce(testing::Return("not valid json"));
+
+    EXPECT_THROW(client.connect(), AuthError);
+}
+
+TEST_F(HomeAssistantClientTest, ThrowsCommandErrorOnFailedCommand) {
+    auto [client, mock] = makeClient("wss://ha.local/api/websocket", "token");
+
+    // First: authenticate successfully
+    EXPECT_CALL(*mock, connect(testing::_, testing::_, testing::_));
+    EXPECT_CALL(*mock, read())
+        .WillOnce(testing::Return(R"({"type": "auth_required"})"))
+        .WillOnce(testing::Return(R"({"type": "auth_ok"})"))
+        .WillOnce(testing::Return(
+            R"({"id": 1, "success": false, "error": {"code": "not_found", "message": "Dashboard not found"}})"
+        ));
+    EXPECT_CALL(*mock, write(testing::_)).Times(2);
+
+    client.connect();
+    EXPECT_THROW(client.getDashboardConfig("nonexistent"), CommandError);
+}
+
+TEST_F(HomeAssistantClientTest, CommandErrorContainsHaMessage) {
+    auto [client, mock] = makeClient("wss://ha.local/api/websocket", "token");
+
+    EXPECT_CALL(*mock, connect(testing::_, testing::_, testing::_));
+    EXPECT_CALL(*mock, read())
+        .WillOnce(testing::Return(R"({"type": "auth_required"})"))
+        .WillOnce(testing::Return(R"({"type": "auth_ok"})"))
+        .WillOnce(testing::Return(
+            R"({"id": 1, "success": false, "error": {"code": "not_found", "message": "Dashboard not found"}})"
+        ));
+    EXPECT_CALL(*mock, write(testing::_)).Times(2);
+
+    client.connect();
+    try {
+        client.getDashboardConfig("nonexistent");
+        FAIL() << "Expected CommandError";
+    } catch (const CommandError& e) {
+        EXPECT_THAT(e.what(), testing::HasSubstr("Dashboard not found"));
+    }
 }

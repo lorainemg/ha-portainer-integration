@@ -1,14 +1,23 @@
 #include "ha_client.h"
+#include "../errors.h"
+#include <iostream>
 
-// Constructor now takes a connection via std::move (transfers ownership)
 HomeAssistantClient::HomeAssistantClient(const std::string& url,
                                          const std::string& token,
                                          std::unique_ptr<IWebSocketConnection> connection)
     : token_(token), ws_(std::move(connection)) {
-    // url = "wss://homeassistant.sussman.win/api/websocket"
 
-    auto host_start = url.find("://") + 3;        // position after "wss://"
-    auto path_start = url.find('/', host_start);   // position of "/api/websocket"
+    // Validate URL format: must have "://" and a path after the host
+    auto scheme_end = url.find("://");
+    if (scheme_end == std::string::npos) {
+        throw ConfigError("Invalid WebSocket URL (missing ://): " + url);
+    }
+
+    auto host_start = scheme_end + 3;
+    auto path_start = url.find('/', host_start);
+    if (path_start == std::string::npos) {
+        throw ConfigError("Invalid WebSocket URL (missing path): " + url);
+    }
 
     auto host_and_port = url.substr(host_start, path_start - host_start);
     path_ = url.substr(path_start);
@@ -24,29 +33,37 @@ HomeAssistantClient::HomeAssistantClient(const std::string& url,
 }
 
 void HomeAssistantClient::connect() {
-    // Now just delegates to the interface — all Boost details are hidden
     ws_->connect(host_, port_, path_);
 
-    // --- HA authentication ---
+    try {
+        auto auth_required = json::parse(ws_->read());
+    } catch (const json::parse_error& e) {
+        throw AuthError(std::string("Failed to parse auth_required message: ") + e.what());
+    }
 
-    // Read the auth_required message from HA
-    ws_->read();
-
-    // Send auth token as JSON
     json auth_msg = {{"type", "auth"}, {"access_token", token_}};
     ws_->write(auth_msg.dump());
 
-    // Read the auth response and check it
-    auto response = json::parse(ws_->read());
+    json response;
+    try {
+        response = json::parse(ws_->read());
+    } catch (const json::parse_error& e) {
+        throw AuthError(std::string("Failed to parse auth response: ") + e.what());
+    }
 
     if (response["type"] != "auth_ok") {
-        throw std::runtime_error("Authentication failed");
+        std::string detail = response.value("message", response.dump());
+        throw AuthError("Authentication failed: " + detail);
     }
 }
 
 void HomeAssistantClient::disconnect() const {
     if (ws_) {
-        ws_->close();
+        try {
+            ws_->close();
+        } catch (const std::exception& e) {
+            std::cerr << "Warning: error during disconnect: " << e.what() << std::endl;
+        }
     }
 }
 
@@ -76,10 +93,21 @@ json HomeAssistantClient::sendCommand(const json& message) {
 
     ws_->write(msg.dump());
 
-    auto response = json::parse(ws_->read());
+    json response;
+    try {
+        response = json::parse(ws_->read());
+    } catch (const json::parse_error& e) {
+        throw CommandError(std::string("Failed to parse HA response: ") + e.what());
+    }
 
     if (!response.value("success", false)) {
-        throw std::runtime_error("Command failed: " + response.dump());
+        std::string detail;
+        if (response.contains("error") && response["error"].contains("message")) {
+            detail = response["error"]["message"].get<std::string>();
+        } else {
+            detail = response.dump();
+        }
+        throw CommandError("Command failed: " + detail);
     }
 
     return response["result"];

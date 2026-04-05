@@ -1,4 +1,5 @@
 #include "dashboard_updater.h"
+#include "../errors.h"
 #include <algorithm>  // for std::find_if
 #include <utility>    // for std::move
 
@@ -38,6 +39,14 @@ json DashboardUpdater::generateView() const {
 }
 
 json DashboardUpdater::updateDashboard(const json& existing_config) const {
+    // Validate dashboard structure
+    if (!existing_config.contains("views")) {
+        throw DashboardError("Dashboard config missing 'views' key");
+    }
+    if (!existing_config["views"].is_array()) {
+        throw DashboardError("Dashboard config 'views' is not an array");
+    }
+
     // Copy the config so we don't modify the original
     json config = existing_config;
     json& views = config["views"];

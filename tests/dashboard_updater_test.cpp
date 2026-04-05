@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include "../src/dashboard/dashboard_updater.h"
+#include "../src/errors.h"
 
 class DashboardUpdaterTest : public ::testing::Test {
 protected:
@@ -98,4 +99,20 @@ TEST_F(DashboardUpdaterTest, UpdateDashboardAppendsWhenNoPortainerView) {
     ASSERT_EQ(result["views"].size(), 2);
     EXPECT_EQ(result["views"][0]["title"], "Home");
     EXPECT_EQ(result["views"][1]["title"], "Portainer");
+}
+
+TEST_F(DashboardUpdaterTest, ThrowsDashboardErrorWhenViewsKeyMissing) {
+    DashboardUpdater updater("https://portainer.example.com", {netdata});
+
+    json config = {{"title", "My Dashboard"}};  // no "views" key
+
+    EXPECT_THROW(updater.updateDashboard(config), DashboardError);
+}
+
+TEST_F(DashboardUpdaterTest, ThrowsDashboardErrorWhenViewsNotArray) {
+    DashboardUpdater updater("https://portainer.example.com", {netdata});
+
+    json config = {{"views", "not an array"}};
+
+    EXPECT_THROW(updater.updateDashboard(config), DashboardError);
 }

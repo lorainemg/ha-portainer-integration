@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <memory>
 
+#include "errors.h"
 #include "ha/ha_client.h"
 #include "ws/boost_ws_connection.h"
 #include "dashboard/dashboard_updater.h"
@@ -41,8 +42,11 @@ int main() {
 
     try {
         run(url, token, portainer_url);
-    } catch (const std::exception& e) {
+    } catch (const HaPortainerError& e) {
         std::cerr << "Error: " << e.what() << std::endl;
+        return 1;
+    } catch (const std::exception& e) {
+        std::cerr << "Unexpected error: " << e.what() << std::endl;
         return 1;
     }
 

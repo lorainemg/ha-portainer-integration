@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <fstream>
-#include <yaml-cpp/yaml.h>
 #include "../src/config/config_parser.h"
+#include "../src/errors.h"
 
 // Helper: writes YAML content to a temp file and returns the path
 static std::string writeTempYaml(const std::string& content) {
@@ -99,6 +99,51 @@ stacks:
     EXPECT_TRUE(stacks[2].isExpander());
 }
 
-TEST(ConfigParserTest, ThrowsOnMissingFile) {
-    EXPECT_THROW(loadStacks("/tmp/nonexistent.yaml"), YAML::BadFile);
+TEST(ConfigParserTest, ThrowsConfigErrorOnMissingFile) {
+    EXPECT_THROW(loadStacks("/tmp/nonexistent_stacks.yaml"), ConfigError);
+}
+
+TEST(ConfigParserTest, ThrowsConfigErrorOnInvalidYaml) {
+    auto path = writeTempYaml("not: [valid: yaml: content");
+    EXPECT_THROW(loadStacks(path), ConfigError);
+}
+
+TEST(ConfigParserTest, ThrowsConfigErrorOnMissingSlug) {
+    auto path = writeTempYaml(R"(
+stacks:
+  - name: Netdata
+    icon: mdi:chart-line
+)");
+    EXPECT_THROW(loadStacks(path), ConfigError);
+}
+
+TEST(ConfigParserTest, ThrowsConfigErrorOnMissingName) {
+    auto path = writeTempYaml(R"(
+stacks:
+  - slug: netdata
+    icon: mdi:chart-line
+)");
+    EXPECT_THROW(loadStacks(path), ConfigError);
+}
+
+TEST(ConfigParserTest, ThrowsConfigErrorOnMissingIcon) {
+    auto path = writeTempYaml(R"(
+stacks:
+  - slug: netdata
+    name: Netdata
+)");
+    EXPECT_THROW(loadStacks(path), ConfigError);
+}
+
+TEST(ConfigParserTest, ThrowsConfigErrorOnMissingContainerSlug) {
+    auto path = writeTempYaml(R"(
+stacks:
+  - slug: caddy
+    name: Caddy
+    icon: mdi:shield-check
+    containers:
+      - name: Caddy
+        icon: mdi:shield-check
+)");
+    EXPECT_THROW(loadStacks(path), ConfigError);
 }
