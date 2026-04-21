@@ -1,14 +1,4 @@
 stacks:
-  - slug: netdata
-    name: Netdata
-    icon: mdi:chart-line
-    portainer_id: 10
-
-  - slug: portainer
-    name: Portainer
-    icon: mdi:anchor
-    portainer_id: 0
-
   - slug: caddy
     name: Caddy
     icon: mdi:image-multiple
@@ -20,7 +10,6 @@ stacks:
       - slug: cloudflared
         name: Cloudflared
         icon: mdi:cloud-arrow-up
-
   - slug: home_assistant
     name: Home Assistant
     icon: mdi:image-multiple
@@ -32,7 +21,16 @@ stacks:
       - slug: mosquitto
         name: Mosquitto
         icon: mdi:message-arrow-up-down
-
+      - slug: whisper
+        name: whisper
+        icon: mdi:application-outline
+      - slug: piper
+        name: piper
+        icon: mdi:application-outline
+    ignored_containers:
+      - github_copilot_bridge
+      - ollama
+      - ollama_pull
   - slug: immich
     name: Immich
     icon: mdi:image-multiple
@@ -50,18 +48,48 @@ stacks:
       - slug: immich_redis
         name: Redis
         icon: mdi:database-arrow-up
-
   - slug: trakt_tg_bot
     name: Trakt TG Bot
     icon: mdi:image-multiple
     portainer_id: 20
     containers:
-      - slug: trakt_tg_bot_bot_1
-        name: TG Bot
-        icon: mdi:robot
-      - slug: trakt_tg_bot_env_dashboard_1
-        name: Aspire
-        icon: mdi:brain
-      - slug: trakt_tg_bot_postgres_1
-        name: Aspire
-        icon: mdi:database
+      - slug: bot
+        name: bot
+        icon: mdi:application-outline
+      - slug: aspire
+        name: aspire
+        icon: mdi:application-outline
+      - slug: trakt_db
+        name: trakt_db
+        icon: mdi:application-outline
+  - slug: monitoring
+    name: monitoring
+    icon: mdi:cube-outline
+    portainer_id: 21
+    containers:
+      - slug: prometheus
+        name: prometheus
+        icon: mdi:application-outline
+      - slug: cadvisor
+        name: cadvisor
+        icon: mdi:application-outline
+      - slug: grafana
+        name: grafana
+        icon: mdi:application-outline
+      - slug: loki
+        name: loki
+        icon: mdi:application-outline
+      - slug: tempo
+        name: tempo
+        icon: mdi:application-outline
+      - slug: otel_collector
+        name: otel_collector
+        icon: mdi:application-outline
+      - slug: node_exporter
+        name: node_exporter
+        icon: mdi:application-outline
+      - slug: promtail
+        name: promtail
+        icon: mdi:application-outline
+ignored:
+  - docker_registry
