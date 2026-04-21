@@ -1,0 +1,53 @@
+name: Update Portainer stacks
+
+# Manual trigger only — this workflow has access to secrets and pushes to main,
+# so we deliberately don't run it on pull_request / push triggers.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# Serialize runs so two clicks don't race on the git push.
+concurrency:
+  group: update-stacks
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Write .env from repository secrets
+        # The heredoc is single-quoted ('EOF') so the shell does NOT interpret
+        # secret values — protects against tokens containing $, `, \ etc.
+        # GitHub Actions' ${{ ... }} substitution runs BEFORE the shell, so
+        # secrets are inlined literally. .env is gitignored (see .gitignore).
+        run: |
+          cat > .env <<'EOF'
+          HA_URL=${{ secrets.HA_URL }}
+          HA_TOKEN=${{ secrets.HA_TOKEN }}
+          PORTAINER_URL=${{ secrets.PORTAINER_URL }}
+          PORTAINER_TOKEN=${{ secrets.PORTAINER_TOKEN }}
+          PORTAINER_ENDPOINT_ID=${{ secrets.PORTAINER_ENDPOINT_ID || '3' }}
+          EOF
+
+      - name: Build image and run auto-discovery
+        run: |
+          docker compose build
+          docker compose run --rm ha-portainer \
+            bash -c "cmake -B build && cmake --build build --parallel && ./build/ha-portainer --yes"
+
+      - name: Commit and push updated stacks.yaml if it changed
+        run: |
+          if git diff --quiet stacks.yaml; then
+            echo "No stacks.yaml changes to commit."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add stacks.yaml
+          git commit -m "Auto-update stacks.yaml from Portainer discovery"
+          git push
