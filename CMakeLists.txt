@@ -28,6 +28,7 @@ add_executable(ha-portainer
     src/portainer/portainer_client.cpp
     src/discovery/reconciler.cpp
     src/discovery/prompter.cpp
+    src/discovery/apply.cpp
 )
 
 target_link_libraries(ha-portainer PRIVATE
@@ -49,6 +50,7 @@ add_executable(ha-portainer-tests
     tests/portainer_client_test.cpp
     tests/reconciler_test.cpp
     tests/prompter_test.cpp
+    tests/apply_test.cpp
     src/ha/ha_client.cpp
     src/dashboard/dashboard_updater.cpp
     src/config/config_parser.cpp
@@ -56,6 +58,7 @@ add_executable(ha-portainer-tests
     src/portainer/portainer_client.cpp
     src/discovery/reconciler.cpp
     src/discovery/prompter.cpp
+    src/discovery/apply.cpp
 )
 
 target_link_libraries(ha-portainer-tests PRIVATE
