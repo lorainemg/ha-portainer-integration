@@ -24,6 +24,7 @@ add_executable(ha-portainer
     src/dashboard/dashboard_updater.cpp
     src/config/config_parser.cpp
     src/portainer/slug.cpp
+    src/portainer/boost_http_client.cpp
 )
 
 target_link_libraries(ha-portainer PRIVATE
