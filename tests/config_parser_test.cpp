@@ -194,3 +194,47 @@ stacks:
     EXPECT_TRUE(state.ignored.empty());
     EXPECT_TRUE(state.stacks[0].ignored_containers.empty());
 }
+
+TEST(ConfigParserTest, RoundTripPreservesAllFields) {
+    YamlState original;
+    Stack s1{.slug = "immich",
+             .name = "Immich",
+             .icon = "mdi:image-multiple",
+             .portainer_id = 1};
+    s1.containers.push_back({"immich_server", "Server", "mdi:server"});
+    s1.containers.push_back({"immich_postgres", "Postgres", "mdi:database"});
+    s1.ignored_containers = {"immich_redis"};
+    original.stacks.push_back(s1);
+    original.ignored = {"watchtower"};
+
+    std::string path = "/tmp/test_roundtrip.yaml";
+    saveYamlState(path, original);
+
+    auto reloaded = loadYamlState(path);
+
+    ASSERT_EQ(reloaded.stacks.size(), 1);
+    EXPECT_EQ(reloaded.stacks[0].slug, "immich");
+    EXPECT_EQ(reloaded.stacks[0].name, "Immich");
+    EXPECT_EQ(reloaded.stacks[0].icon, "mdi:image-multiple");
+    EXPECT_EQ(reloaded.stacks[0].portainer_id, 1);
+    ASSERT_EQ(reloaded.stacks[0].containers.size(), 2);
+    EXPECT_EQ(reloaded.stacks[0].containers[1].name, "Postgres");
+    ASSERT_EQ(reloaded.stacks[0].ignored_containers.size(), 1);
+    EXPECT_EQ(reloaded.stacks[0].ignored_containers[0], "immich_redis");
+    ASSERT_EQ(reloaded.ignored.size(), 1);
+    EXPECT_EQ(reloaded.ignored[0], "watchtower");
+}
+
+TEST(ConfigParserTest, SaveOmitsEmptyOptionalFields) {
+    YamlState original;
+    original.stacks.push_back({.slug = "netdata",
+                               .name = "Netdata",
+                               .icon = "mdi:chart-line",
+                               .portainer_id = 10});
+    saveYamlState("/tmp/test_minimal.yaml", original);
+    auto reloaded = loadYamlState("/tmp/test_minimal.yaml");
+
+    EXPECT_TRUE(reloaded.stacks[0].containers.empty());
+    EXPECT_TRUE(reloaded.stacks[0].ignored_containers.empty());
+    EXPECT_TRUE(reloaded.ignored.empty());
+}
