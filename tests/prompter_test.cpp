@@ -49,6 +49,28 @@ TEST(PrompterTest, PromptForDiffWalksAllSectionsAndPreservesSkip) {
     EXPECT_FALSE(d.quit);
 }
 
+TEST(PrompterTest, AllYesProducesMatchingSizedYesVectors) {
+    DiffReport diff;
+    diff.new_stacks.push_back({1, "a", "a", {}});
+    diff.new_stacks.push_back({2, "b", "b", {}});
+    diff.gone_stacks.push_back({"old"});
+    diff.new_containers.push_back({"a", "a_1"});
+    diff.gone_containers.push_back({"old", "old_1"});
+
+    auto d = allYes(diff);
+
+    ASSERT_EQ(d.new_stack.size(), 2);
+    EXPECT_EQ(d.new_stack[0], Answer::Yes);
+    EXPECT_EQ(d.new_stack[1], Answer::Yes);
+    ASSERT_EQ(d.gone_stack.size(), 1);
+    EXPECT_EQ(d.gone_stack[0], Answer::Yes);
+    ASSERT_EQ(d.new_container.size(), 1);
+    EXPECT_EQ(d.new_container[0], Answer::Yes);
+    ASSERT_EQ(d.gone_container.size(), 1);
+    EXPECT_EQ(d.gone_container[0], Answer::Yes);
+    EXPECT_FALSE(d.quit);
+}
+
 TEST(PrompterTest, QuitEndsWalkImmediately) {
     DiffReport diff;
     diff.new_stacks.push_back({1, "a", "a"});

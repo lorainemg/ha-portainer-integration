@@ -28,6 +28,15 @@ static bool askInto(std::vector<Answer>& target,
     return true;
 }
 
+Decisions allYes(const DiffReport& diff) {
+    Decisions d;
+    d.new_stack.assign(diff.new_stacks.size(), Answer::Yes);
+    d.gone_stack.assign(diff.gone_stacks.size(), Answer::Yes);
+    d.new_container.assign(diff.new_containers.size(), Answer::Yes);
+    d.gone_container.assign(diff.gone_containers.size(), Answer::Yes);
+    return d;
+}
+
 Decisions promptForDiff(const DiffReport& diff,
                         std::istream& in,
                         std::ostream& out) {

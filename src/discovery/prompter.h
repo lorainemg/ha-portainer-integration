@@ -26,3 +26,7 @@ Decisions promptForDiff(const DiffReport& diff,
 Answer askYesNoSkipQuit(const std::string& question,
                         std::istream& in,
                         std::ostream& out);
+
+// Non-interactive: produce a Decisions that says Yes to every item in the diff.
+// Used by --yes / CI mode to auto-accept all discovered changes.
+Decisions allYes(const DiffReport& diff);
