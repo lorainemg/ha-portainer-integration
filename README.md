@@ -40,9 +40,9 @@ A C++ tool that auto-discovers Portainer stacks/containers, lets you curate whic
 
 3. Build and run:
    ```bash
-   docker compose build
-   docker compose run --rm ha-portainer bash -c "cmake -B build && cmake --build build && ./build/ha-portainer"
+   make run
    ```
+   (First invocation will build the Docker image automatically. See `make help` for other targets — `make build`, `make test`, `make shell`, `make clean`, `make image`.)
 
    The first run discovers all your Portainer stacks and prompts you for each one. Approved stacks are persisted to `stacks.yaml`; declined ones go into an `ignored:` list so you won't be re-asked. On later runs, only drift vs. Portainer triggers new prompts — if nothing changed, the dashboard is just re-pushed silently.
 
@@ -51,7 +51,7 @@ A C++ tool that auto-discovers Portainer stacks/containers, lets you curate whic
 ## Running Tests
 
 ```bash
-docker compose run --rm ha-portainer bash -c "cmake -B build && cmake --build build && cd build && ctest --output-on-failure"
+make test
 ```
 
 ## Tech Stack

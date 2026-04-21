@@ -12,19 +12,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Build & Run
 
+All common workflows are exposed through the top-level `Makefile`. Running `make` with no arguments prints the help.
+
 ```bash
-# Build the Docker image (only needed when dependencies change)
-docker compose build
-
-# Build inside container
-docker compose run --rm ha-portainer bash -c "cmake -B build && cmake --build build"
-
-# Run
-docker compose run --rm ha-portainer bash -c "cmake -B build && cmake --build build && ./build/ha-portainer"
-
-# Run tests
-docker compose run --rm ha-portainer bash -c "cmake -B build && cmake --build build && cd build && ctest --output-on-failure"
+make build   # configure and compile inside the container
+make test    # build + run the full test suite via ctest
+make run     # build + execute the ha-portainer binary
+make shell   # drop into a bash shell inside the container
+make clean   # remove the build/ directory
+make image   # rebuild the Docker image (only needed when Dockerfile changes)
 ```
+
+Each target wraps `docker compose run --rm ha-portainer <command>` — the container is ephemeral and the repo is bind-mounted at `/app`, so build artifacts persist in `./build/` on the host between runs.
 
 Requires a `.env` file with:
 ```

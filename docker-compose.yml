@@ -5,4 +5,3 @@ services:
       - .:/app
     env_file:
       - .env
-    command: bash -c "cmake -B build && cmake --build build && ./build/ha-portainer"
