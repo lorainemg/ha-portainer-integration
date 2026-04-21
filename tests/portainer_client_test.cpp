@@ -76,6 +76,22 @@ TEST(PortainerClientTest, ListAllContainersExtractsStackNameFromLabel) {
     EXPECT_EQ(containers[1].stack_name, "");
 }
 
+TEST(PortainerClientTest, ListAllContainersNormalizesHyphensInNames) {
+    auto mock = std::make_unique<MockHttpClient>();
+    EXPECT_CALL(*mock, get(_, _))
+        .WillOnce(Return(R"([
+            {"Names": ["/trakt-db"],       "Labels": {"com.docker.compose.project": "trakt-tg-bot"}},
+            {"Names": ["/immich-server"],  "Labels": {"com.docker.compose.project": "immich"}}
+        ])"));
+
+    PortainerClient client("https://portainer.local", "token", 3, std::move(mock));
+    auto containers = client.listAllContainers();
+
+    ASSERT_EQ(containers.size(), 2);
+    EXPECT_EQ(containers[0].name, "trakt_db");
+    EXPECT_EQ(containers[1].name, "immich_server");
+}
+
 TEST(PortainerClientTest, ListStacksThrowsOnInvalidJson) {
     auto mock = std::make_unique<MockHttpClient>();
     EXPECT_CALL(*mock, get(_, _)).WillOnce(Return("not json"));

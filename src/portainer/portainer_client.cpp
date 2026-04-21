@@ -1,5 +1,6 @@
 #include "portainer_client.h"
 #include "../errors.h"
+#include "slug.h"
 #include <nlohmann/json.hpp>
 #include <utility>
 
@@ -65,7 +66,10 @@ std::vector<PortainerContainer> PortainerClient::listAllContainers() {
         PortainerContainer c;
         if (item.contains("Names") && item["Names"].is_array() && !item["Names"].empty()) {
             std::string raw = item["Names"][0].get<std::string>();
-            c.name = (!raw.empty() && raw[0] == '/') ? raw.substr(1) : raw;
+            std::string stripped = (!raw.empty() && raw[0] == '/') ? raw.substr(1) : raw;
+            // Normalize hyphens to underscores so the slug matches HA entity conventions
+            // and stays consistent with yaml's stored container slugs.
+            c.name = slugify(stripped);
         }
         if (item.contains("Labels") && item["Labels"].is_object()) {
             const auto& labels = item["Labels"];
