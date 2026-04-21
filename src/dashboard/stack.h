@@ -17,6 +17,7 @@ struct Stack {
     std::string icon;
     int portainer_id = 0;
     std::vector<Container> containers;  // dynamic array, like Python's list
+    std::vector<std::string> ignored_containers;  // slugs of declined containers within this stack
 
     // Helper methods matching your Python @property methods
 
@@ -39,4 +40,12 @@ struct Stack {
     // Entity ID helpers
     std::string status() const { return "binary_sensor." + slug + "_status"; }
     std::string stackSwitch() const { return "switch." + slug + "_stack"; }
+};
+
+// Whole-file representation of stacks.yaml.
+//   stacks  — approved stacks (rendered on the dashboard)
+//   ignored — slugs of declined whole stacks (skipped on future runs)
+struct YamlState {
+    std::vector<Stack> stacks;
+    std::vector<std::string> ignored;
 };
