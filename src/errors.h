@@ -39,3 +39,9 @@ class DashboardError : public HaPortainerError {
 public:
     using HaPortainerError::HaPortainerError;
 };
+
+// Portainer API failures: connection, non-2xx HTTP, malformed JSON
+class PortainerError : public HaPortainerError {
+public:
+    using HaPortainerError::HaPortainerError;
+};
