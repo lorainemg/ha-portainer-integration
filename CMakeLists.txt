@@ -25,6 +25,7 @@ add_executable(ha-portainer
     src/config/config_parser.cpp
     src/portainer/slug.cpp
     src/portainer/boost_http_client.cpp
+    src/portainer/portainer_client.cpp
 )
 
 target_link_libraries(ha-portainer PRIVATE
@@ -43,10 +44,12 @@ add_executable(ha-portainer-tests
     tests/dashboard_updater_test.cpp
     tests/config_parser_test.cpp
     tests/slug_test.cpp
+    tests/portainer_client_test.cpp
     src/ha/ha_client.cpp
     src/dashboard/dashboard_updater.cpp
     src/config/config_parser.cpp
     src/portainer/slug.cpp
+    src/portainer/portainer_client.cpp
 )
 
 target_link_libraries(ha-portainer-tests PRIVATE
