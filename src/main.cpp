@@ -19,8 +19,8 @@ void run(const std::string& url, const std::string& token, const std::string& po
     auto config = client.getDashboardConfig("dashboard-test");
 
     std::cout << "Updating Portainer view..." << std::endl;
-    auto stacks = loadStacks("/app/stacks.yaml");
-    DashboardUpdater updater(portainer_url, stacks);
+    auto state = loadYamlState("/app/stacks.yaml");
+    DashboardUpdater updater(portainer_url, state.stacks);
     auto updated = updater.updateDashboard(config);
 
     std::cout << "Saving dashboard..." << std::endl;

@@ -20,7 +20,7 @@ stacks:
     portainer_id: 10
 )");
 
-    auto stacks = loadStacks(path);
+    auto stacks = loadYamlState(path).stacks;
 
     ASSERT_EQ(stacks.size(), 1);
     EXPECT_EQ(stacks[0].slug, "netdata");
@@ -46,7 +46,7 @@ stacks:
         icon: mdi:cloud-arrow-up
 )");
 
-    auto stacks = loadStacks(path);
+    auto stacks = loadYamlState(path).stacks;
 
     ASSERT_EQ(stacks.size(), 1);
     ASSERT_EQ(stacks[0].containers.size(), 2);
@@ -63,7 +63,7 @@ stacks:
     icon: mdi:anchor
 )");
 
-    auto stacks = loadStacks(path);
+    auto stacks = loadYamlState(path).stacks;
 
     ASSERT_EQ(stacks.size(), 1);
     EXPECT_EQ(stacks[0].portainer_id, 0);
@@ -89,7 +89,7 @@ stacks:
         icon: mdi:shield-check
 )");
 
-    auto stacks = loadStacks(path);
+    auto stacks = loadYamlState(path).stacks;
 
     ASSERT_EQ(stacks.size(), 3);
     EXPECT_EQ(stacks[0].slug, "netdata");
@@ -100,12 +100,12 @@ stacks:
 }
 
 TEST(ConfigParserTest, ThrowsConfigErrorOnMissingFile) {
-    EXPECT_THROW(loadStacks("/tmp/nonexistent_stacks.yaml"), ConfigError);
+    EXPECT_THROW(loadYamlState("/tmp/nonexistent_stacks.yaml"), ConfigError);
 }
 
 TEST(ConfigParserTest, ThrowsConfigErrorOnInvalidYaml) {
     auto path = writeTempYaml("not: [valid: yaml: content");
-    EXPECT_THROW(loadStacks(path), ConfigError);
+    EXPECT_THROW(loadYamlState(path), ConfigError);
 }
 
 TEST(ConfigParserTest, ThrowsConfigErrorOnMissingSlug) {
@@ -114,7 +114,7 @@ stacks:
   - name: Netdata
     icon: mdi:chart-line
 )");
-    EXPECT_THROW(loadStacks(path), ConfigError);
+    EXPECT_THROW(loadYamlState(path), ConfigError);
 }
 
 TEST(ConfigParserTest, ThrowsConfigErrorOnMissingName) {
@@ -123,7 +123,7 @@ stacks:
   - slug: netdata
     icon: mdi:chart-line
 )");
-    EXPECT_THROW(loadStacks(path), ConfigError);
+    EXPECT_THROW(loadYamlState(path), ConfigError);
 }
 
 TEST(ConfigParserTest, ThrowsConfigErrorOnMissingIcon) {
@@ -132,7 +132,7 @@ stacks:
   - slug: netdata
     name: Netdata
 )");
-    EXPECT_THROW(loadStacks(path), ConfigError);
+    EXPECT_THROW(loadYamlState(path), ConfigError);
 }
 
 TEST(ConfigParserTest, ThrowsConfigErrorOnMissingContainerSlug) {
@@ -145,5 +145,52 @@ stacks:
       - name: Caddy
         icon: mdi:shield-check
 )");
-    EXPECT_THROW(loadStacks(path), ConfigError);
+    EXPECT_THROW(loadYamlState(path), ConfigError);
+}
+
+TEST(ConfigParserTest, LoadsTopLevelIgnoredList) {
+    auto path = writeTempYaml(R"(
+stacks: []
+ignored:
+  - watchtower
+  - dev_only_stack
+)");
+    auto state = loadYamlState(path);
+    ASSERT_EQ(state.ignored.size(), 2);
+    EXPECT_EQ(state.ignored[0], "watchtower");
+    EXPECT_EQ(state.ignored[1], "dev_only_stack");
+}
+
+TEST(ConfigParserTest, LoadsPerStackIgnoredContainers) {
+    auto path = writeTempYaml(R"(
+stacks:
+  - slug: immich
+    name: Immich
+    icon: mdi:image-multiple
+    portainer_id: 1
+    containers:
+      - slug: immich_server
+        name: Server
+        icon: mdi:server
+    ignored_containers:
+      - immich_redis
+      - immich_typesense
+)");
+    auto state = loadYamlState(path);
+    ASSERT_EQ(state.stacks.size(), 1);
+    ASSERT_EQ(state.stacks[0].ignored_containers.size(), 2);
+    EXPECT_EQ(state.stacks[0].ignored_containers[0], "immich_redis");
+}
+
+TEST(ConfigParserTest, IgnoredFieldsDefaultToEmpty) {
+    auto path = writeTempYaml(R"(
+stacks:
+  - slug: netdata
+    name: Netdata
+    icon: mdi:chart-line
+    portainer_id: 10
+)");
+    auto state = loadYamlState(path);
+    EXPECT_TRUE(state.ignored.empty());
+    EXPECT_TRUE(state.stacks[0].ignored_containers.empty());
 }

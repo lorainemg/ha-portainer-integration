@@ -12,7 +12,17 @@ static std::string requireField(const YAML::Node& node,
     return node[field].as<std::string>();
 }
 
-std::vector<Stack> loadStacks(const std::string& filepath) {
+// Reads an optional YAML sequence of strings; returns empty vector if absent.
+static std::vector<std::string> readStringList(const YAML::Node& node) {
+    std::vector<std::string> out;
+    if (!node || !node.IsSequence()) return out;
+    for (size_t i = 0; i < node.size(); ++i) {
+        out.push_back(node[i].as<std::string>());
+    }
+    return out;
+}
+
+YamlState loadYamlState(const std::string& filepath) {
     YAML::Node yamlData;
     try {
         yamlData = YAML::LoadFile(filepath);
@@ -26,12 +36,12 @@ std::vector<Stack> loadStacks(const std::string& filepath) {
         throw ConfigError("Config file missing required 'stacks' list");
     }
 
-    std::vector<Stack> stacks;
+    YamlState state;
     for (size_t i = 0; i < yamlData["stacks"].size(); ++i) {
         const auto& stack = yamlData["stacks"][i];
         std::string ctx = "Stack #" + std::to_string(i + 1);
 
-        auto stackObj = Stack{
+        Stack stackObj{
             .slug = requireField(stack, "slug", ctx),
             .name = requireField(stack, "name", ctx),
             .icon = requireField(stack, "icon", ctx),
@@ -39,19 +49,18 @@ std::vector<Stack> loadStacks(const std::string& filepath) {
         };
 
         if (stack["containers"]) {
-            std::vector<Container> containers;
             for (size_t j = 0; j < stack["containers"].size(); ++j) {
                 const auto& container = stack["containers"][j];
                 std::string cctx = ctx + ", container #" + std::to_string(j + 1);
-
-                containers.push_back(Container{
+                stackObj.containers.push_back(Container{
                     .slug = requireField(container, "slug", cctx),
                     .name = requireField(container, "name", cctx),
                     .icon = requireField(container, "icon", cctx)});
             }
-            stackObj.containers = containers;
         }
-        stacks.push_back(stackObj);
+        stackObj.ignored_containers = readStringList(stack["ignored_containers"]);
+        state.stacks.push_back(stackObj);
     }
-    return stacks;
+    state.ignored = readStringList(yamlData["ignored"]);
+    return state;
 }

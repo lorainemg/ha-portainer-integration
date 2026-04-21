@@ -1,8 +1,7 @@
 #pragma once
 
 #include <string>
-#include <vector>
 #include "../dashboard/stack.h"
 
-// Reads a YAML config file and returns the stack definitions
-std::vector<Stack> loadStacks(const std::string& filepath);
+// Reads a YAML config file and returns the full state (approved stacks + ignored list).
+YamlState loadYamlState(const std::string& filepath);
