@@ -21,12 +21,17 @@ void applyDecisions(YamlState& state,
     for (size_t i = 0; i < diff.new_stacks.size(); ++i) {
         const auto& ns = diff.new_stacks[i];
         switch (answerAt(decisions.new_stack, i)) {
-            case Answer::Yes:
-                state.stacks.push_back({.slug = ns.proposed_slug,
-                                        .name = ns.portainer_name,
-                                        .icon = kDefaultStackIcon,
-                                        .portainer_id = ns.portainer_id});
+            case Answer::Yes: {
+                Stack new_stack{.slug = ns.proposed_slug,
+                                .name = ns.portainer_name,
+                                .icon = kDefaultStackIcon,
+                                .portainer_id = ns.portainer_id};
+                for (const auto& cname : ns.container_names) {
+                    new_stack.containers.push_back({cname, cname, kDefaultContainerIcon});
+                }
+                state.stacks.push_back(std::move(new_stack));
                 break;
+            }
             case Answer::No:
                 state.ignored.push_back(ns.proposed_slug);
                 break;

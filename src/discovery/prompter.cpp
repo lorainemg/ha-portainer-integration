@@ -37,7 +37,15 @@ Decisions promptForDiff(const DiffReport& diff,
     for (const auto& s : diff.new_stacks) {
         std::string q = "[NEW STACK] \"" + s.portainer_name
                       + "\" (id=" + std::to_string(s.portainer_id)
-                      + ", proposed slug=" + s.proposed_slug + ") — add to dashboard?";
+                      + ", slug=" + s.proposed_slug;
+        if (!s.container_names.empty()) {
+            q += ", containers=";
+            for (size_t i = 0; i < s.container_names.size(); ++i) {
+                if (i > 0) q += ",";
+                q += s.container_names[i];
+            }
+        }
+        q += ") — add to dashboard?";
         if (!askInto(d.new_stack, q, in, out, d)) return d;
     }
     for (const auto& s : diff.gone_stacks) {

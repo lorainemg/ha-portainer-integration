@@ -33,7 +33,13 @@ DiffReport reconcile(const YamlState& yaml,
                 diff.id_changes.push_back({slug, existing->portainer_id, p.id});
             }
         } else if (!ignored_set.count(slug)) {
-            diff.new_stacks.push_back({p.id, p.name, slug});
+            NewStack ns{p.id, p.name, slug, {}};
+            for (const auto& c : portainer_containers) {
+                if (slugify(c.stack_name) == slug) {
+                    ns.container_names.push_back(c.name);
+                }
+            }
+            diff.new_stacks.push_back(std::move(ns));
         }
     }
 

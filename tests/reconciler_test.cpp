@@ -32,7 +32,28 @@ TEST(ReconcilerTest, NewStackAppearsInDiff) {
     EXPECT_EQ(diff.new_stacks[0].portainer_id, 14);
     EXPECT_EQ(diff.new_stacks[0].portainer_name, "monitoring");
     EXPECT_EQ(diff.new_stacks[0].proposed_slug, "monitoring");
+    EXPECT_TRUE(diff.new_stacks[0].container_names.empty());
     EXPECT_TRUE(diff.gone_stacks.empty());
+}
+
+TEST(ReconcilerTest, NewStackIncludesItsContainers) {
+    YamlState yaml;
+    std::vector<PortainerStack>     pStacks     = {{14, "monitoring"}};
+    std::vector<PortainerContainer> pContainers = {
+        {"grafana",    "monitoring", 0},
+        {"prometheus", "monitoring", 0},
+        {"caddy",      "caddy",      0},  // belongs to a different stack — should not attach
+    };
+
+    auto diff = reconcile(yaml, pStacks, pContainers);
+
+    ASSERT_EQ(diff.new_stacks.size(), 1);
+    ASSERT_EQ(diff.new_stacks[0].container_names.size(), 2);
+    EXPECT_EQ(diff.new_stacks[0].container_names[0], "grafana");
+    EXPECT_EQ(diff.new_stacks[0].container_names[1], "prometheus");
+    // new_containers is strictly for additions to already-approved stacks;
+    // a brand-new stack's containers ride along inside NewStack.container_names.
+    EXPECT_TRUE(diff.new_containers.empty());
 }
 
 TEST(ReconcilerTest, IgnoredStackDoesNotAppearAsNew) {

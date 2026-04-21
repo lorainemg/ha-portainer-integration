@@ -15,10 +15,13 @@ struct GoneContainer {
 };
 
 // One stack in Portainer that doesn't appear in either yaml.stacks or yaml.ignored.
+// container_names lists the (already-slugified) container names belonging to this stack;
+// when the user approves the stack, apply auto-populates these as Containers with defaults.
 struct NewStack {
     int portainer_id;
     std::string portainer_name; // raw, used for default `name` and slug derivation
     std::string proposed_slug;  // slugify(portainer_name)
+    std::vector<std::string> container_names;
 };
 
 struct GoneStack {
