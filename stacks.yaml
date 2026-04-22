@@ -88,5 +88,8 @@ stacks:
       - slug: node_exporter
         name: node_exporter
         icon: mdi:application-outline
+      - slug: promtail
+        name: promtail
+        icon: mdi:application-outline
 ignored:
   - docker_registry
